@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+  <style>
+    body {
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 250px;
+        background: linear-gradient(180deg, #42a5d3, #2a628f);
+        padding-top: 20px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar .text-center h3 {
+        color: #fff;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+
+    .sidebar ul {
+        list-style-type: none;
+        padding-left: 0;
+        flex-grow: 1;
+    }
+
+    .sidebar a {
+        color: #fff;
+        padding: 15px 20px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        border-radius: 5px;
+    }
+
+    .sidebar a i {
+        margin-right: 15px;
+        font-size: 1.2em;
+    }
+
+    .sidebar a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+    }
+
+    .sidebar .nav-item.active a {
+        background-color: rgba(255, 255, 255, 0.3);
+        font-weight: bold;
+    }
+
+    .content-wrapper {
+        margin-left: 250px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        transition: margin-left 0.3s ease;
+    }
+
+    /* Scrollbar styling */
+    .sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Estilo para las celdas del encabezado */
+    table.dataTable thead th {
+        background-color: #2a628f; /* Color más oscuro del degradado */
+        color: white;
+        font-weight: bold;
+    }
+
+    /* Estilo del botón para abrir/cerrar la barra lateral */
+    .sidebar-toggle {
+        position: absolute;
+        bottom: 20px;  /* Mueve el botón a la parte inferior */
+        left: 50%;
+        transform: translateX(-50%); /* Centra el botón horizontalmente */
+        background-color: #2a628f;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.5em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-toggle:hover {
+        background-color: #1d4f6b;
+    }
+
+    /* Ajustes para el botón Dark Mode */
+    .dark-mode-toggle {
+        position: absolute;
+        bottom: 80px;  /* Ajusta la posición para que no se tape con el otro botón */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #2a628f;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.5em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .dark-mode-toggle:hover {
+        background-color: #1d4f6b;
+    }
+
+    /* Botón de salir */
+    .logout-toggle {
+        position: absolute;
+        bottom: 140px;  /* Ajusta la posición para no tapar el otro botón */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #2a628f;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.5em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .logout-toggle:hover {
+        background-color: #1d4f6b;
+    }
+
+    .collapsed .sidebar {
+        width: 80px;  /* Deja visible solo los iconos */
+    }
+
+    .collapsed .sidebar a span {
+        display: none;  /* Oculta los textos */
+    }
+
+    .collapsed .sidebar .text-center h3 {
+        display: none;  /* Oculta el texto del nombre cuando la barra lateral está contraída */
+    }
+
+    .collapsed .content-wrapper {
+        margin-left: 80px;
+    }
+
+    /* Dark Mode */
+    .dark-mode {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .dark-mode .sidebar {
+        background: linear-gradient(180deg, #3a6d8f, #2a4d64);
+    }
+
+    .dark-mode .sidebar a {
+        color: #e0e0e0;
+    }
+
+    .dark-mode .sidebar a:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .dark-mode .sidebar .nav-item.active a {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .dark-mode .content-wrapper {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+    }
+    @media (max-width: 768px) {
+    /* Ajustar la barra lateral */
+    .sidebar {
+        width: 80px;
+        overflow-x: hidden;
+        padding-top: 10px;
+    }
+
+    .sidebar .text-center h3 {
+        display: none;
+    }
+
+    .sidebar a span {
+        display: none; /* Oculta los textos en móviles */
+    }
+
+    .sidebar-toggle,
+    .dark-mode-toggle,
+    .logout-toggle {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        transform: none;
+        margin: 10px auto;
+    }
+
+    .sidebar-toggle {
+        margin-top: 0;
+    }
+
+    /* Ajustar el contenido */
+    .content-wrapper {
+        margin-left: 80px; /* Coincide con la barra lateral comprimida */
+    }
+
+    /* Si la barra lateral está colapsada */
+    body.collapsed .content-wrapper {
+        margin-left: 0;
+    }
+
+    body.collapsed .sidebar {
+        width: 0;
+        transition: width 0.3s ease;
+    }
+  }
+
+  @media (max-width: 576px) {
+    /* Aumentar espacio entre botones en pantallas más pequeñas */
+    .sidebar-toggle,
+    .dark-mode-toggle,
+    .logout-toggle {
+        margin: 15px auto;
+    }
+  }
+  </style>
+
+</head>
+<body>
+  <div class="sidebar">
+    <div class="text-center">
+      <h3 class="text-white m-3">DeluxeVision</h3>
+    </div>
+    <ul class="nav flex-column">
+      <li class="nav-item {% if request.path == '/' %}active{% endif %}">
+        <a href="{% url 'list_clients' %}" class="nav-link">
+          <i class="fas fa-tachometer-alt"></i> <span>Clientes</span>
+        </a>
+      </li>
+      <li class="nav-item {% if request.path == '/proveedores/' %}active{% endif %}">
+        <a href="{% url 'list_providers' %}" class="nav-link">
+          <i class="fas fa-users"></i> <span>Proveedores</span>
+        </a>
+      </li>
+      <li class="nav-item {% if request.path == '/papelera/' %}active{% endif %}">
+        <a href="{% url 'bin' %}" class="nav-link">
+          <i class="fas fa-cogs"></i> <span>Papelera</span>
+        </a>
+      </li>
+    </ul>
+    <!-- Botón para abrir/cerrar la barra lateral -->
+     <button class="sidebar-toggle" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+     </button>
+     <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+     <i class="fas fa-moon"></i>
+     </button>
+    <!-- Botón de Cerrar Sesión -->
+     <button class="logout-toggle" onclick="window.location.href='{% url 'logout' %}'">
+     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+     </button>
+
+
+  </div>
+  
+  <div class="content-wrapper">
+    {% block content %}
+    {% endblock %} 
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+  <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready( function () {
+        $('.table').DataTable();
+    } );
+    var table = new DataTable('.table', {
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+        }
+    });
+
+    // Function to toggle the sidebar
+    function toggleSidebar() {
+        document.body.classList.toggle('collapsed');
+    }
+
+    // Function to toggle dark mode
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+    // Function to toggle the sidebar
+function toggleSidebar() {
+    const body = document.body;
+    body.classList.toggle('collapsed');
+    // Si estamos en móvil, aseguramos que el contenido se ajuste
+    if (window.innerWidth <= 768) {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.style.width = body.classList.contains('collapsed') ? '0' : '250px';
+    }
+  }
+  </script>
+</body>
+</html>
